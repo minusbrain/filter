@@ -19,7 +19,7 @@ cat can.log | filter -f canfilter.xml
 
 # License
 
-See [LICENSE]
+See [LICENSE](LICENSE)
 
 # Dependencies
 
@@ -93,7 +93,7 @@ Supported attributes of 'SearchText'
 
 * hits - NOT supported
 * group - NOT supported
-* searchType - See [support](##SearchType)
+* searchType - See [support](#searchtype)
 * matchCase - Supported
 * wholeWord - NOT supported
 * select - NOT supported
@@ -101,8 +101,8 @@ Supported attributes of 'SearchText'
 * bold - NOT supported
 * italic - NOT supported
 * underlined - NOT supported
-* color - See [support](##Colors)
-* bgColor - See [support](##Colors)
+* color - See [support](#colors)
+* bgColor - See [support](#colors)
 * comment - Ignored
 
 ## SearchType
@@ -144,4 +144,4 @@ Currently the following 'color' and 'bgColor' values are supported
 * veryLitePurple
 
 As the number of colors supported by shell with ANSI/VT100 control sequences is limited to 16 some of the above
-XML colors are mapped to the same Shell color. You can find the mapping inside [color.cpp]
+XML colors are mapped to the same Shell color. You can find the mapping inside [color.cpp](src/color.cpp)
