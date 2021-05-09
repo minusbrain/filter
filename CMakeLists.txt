@@ -1,0 +1,35 @@
+cmake_minimum_required (VERSION 3.1)
+
+# Name of the project
+project (filter)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
+
+###################################################################################################
+# add some default settings
+###################################################################################################
+#include (${PROJECT_SOURCE_DIR}/../CMakeModules/default.cmake)
+
+###################################################################################################
+# Header Files
+###################################################################################################
+set (SOURCE_H
+    src/color.h
+    src/parse_xml.h
+    src/search_item.h
+)
+
+###################################################################################################
+#  Source Files
+###################################################################################################
+set (SOURCE_CPP
+   src/main.cpp
+   src/parse_xml.cpp
+   src/color.cpp
+)
+
+add_executable(filter ${SOURCE_CPP} ${SOURCE_H})
+target_link_libraries(filter PocoXML PocoUtil PocoFoundation)
+
+install(TARGETS filter DESTINATION bin)

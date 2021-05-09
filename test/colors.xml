@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<AnalyseDoc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="./AnalyseDoc.xsd">
+    <SearchText searchType="regex">test1</SearchText>
+    <SearchText matchCase="true" wholeWord="true" hide="true" color="darkGrey" bgColor="liteGrey">test2</SearchText>
+    <SearchText color="grey" bgColor="red">test3</SearchText>
+    <SearchText color="liteRed" bgColor="yellow">test4</SearchText>
+    <SearchText color="orange" bgColor="darkYellow">test5</SearchText>
+    <SearchText color="darkRed" bgColor="offWhite">test6</SearchText>
+    <SearchText color="brown" bgColor="liteBeige">test7</SearchText>
+    <SearchText color="beige" bgColor="deepPurple">test8</SearchText>
+    <SearchText color="purple" bgColor="pink">test9</SearchText>
+    <SearchText color="darkBlue" bgColor="veryLiteBlue">test10</SearchText>
+    <SearchText color="blue" bgColor="cyan">test11</SearchText>
+    <SearchText color="liteBlue" bgColor="darkGreen">test12</SearchText>
+    <SearchText color="blueGreen" bgColor="green">test13</SearchText>
+    <SearchText color="liteGreen" bgColor="veryLiteGrey">test14</SearchText>
+    <SearchText color="litePink" bgColor="veryLitePurple">test15</SearchText>
+</AnalyseDoc>

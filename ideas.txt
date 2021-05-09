@@ -1,0 +1,7 @@
+Ideas (Priority 1 (high) - 3 (low) in braces before the line)
+(3) Measure number of lines before and adjust width of line number at beginning of
+(2) Properly support case (in)sensitivity for Plaintext
+(3) Support "whole word" option
+(1) Performance improvements. Check if it is possible to use grep or libgrep(?)
+(2) UTF-8 support
+(3) Generalize color terminal
