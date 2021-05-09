@@ -1,94 +1,117 @@
+// MIT License
+
+// Copyright (c) 2021 Andreas Evers
+
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 #include "parse_xml.h"
 
+#include <iostream>
 #include <fstream>
 
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/NamedNodeMap.h"
-#include "Poco/DOM/NodeFilter.h"
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/SAX/InputSource.h"
+#include <tinyxml2.h>
 
 #include "search_item.h"
 
-void parseSearchItemAttributesXml(const Poco::XML::Node* pNode, SearchItem& searchItem)
-{
-    Poco::XML::NamedNodeMap* attributes = nullptr;
-    if (pNode->hasAttributes())
-    {
-        attributes = pNode->attributes();
+using namespace tinyxml2;
 
-        for (unsigned int i = 0; i < attributes->length(); i++)
+#ifndef XMLCheckResult
+	#define XMLCheckResult(a_eResult) (a_eResult == XML_SUCCESS)
+#endif
+
+void parseSearchItemAttributesXml(XMLElement * pEle, SearchItem& searchItem)
+{
+    const XMLAttribute* attribute = pEle->FirstAttribute();
+
+    while (attribute)
+    {
+        std::string name{attribute->Name()};
+        std::string value{attribute->Value()};
+        if (name == "color")
         {
-            Poco::XML::Node* attribute = attributes->item(i);
-            if (attribute->nodeName() == "color")
+            searchItem.fg_color = Np2InternalColor.at(value);
+        }
+        else if (name == "bgColor")
+        {
+            searchItem.bg_color = Np2InternalColor.at(value);
+        }
+        else if (name == "doSearch" && value == "false")
+        {
+            searchItem.active = false;
+        }
+        else if (name == "searchType")
+        {
+            if (value == "regex")
             {
-                searchItem.fg_color = Np2InternalColor.at(attribute->nodeValue());
-            }
-            else if (attribute->nodeName() == "bgColor")
-            {
-                searchItem.bg_color = Np2InternalColor.at(attribute->nodeValue());
-            }
-            else if (attribute->nodeName() == "doSearch" && attribute->nodeValue() == "false")
-            {
-                searchItem.active = false;
-            }
-            else if (attribute->nodeName() == "searchType")
-            {
-                if (attribute->nodeValue() == "regex")
-                {
-                    searchItem.type = SearchItem::Type::RegExp;
-                }
-            }
-            else if (attribute->nodeName() == "matchCase" && attribute->nodeValue() == "true")
-            {
-                searchItem.caseSensitive = true;
-            }
-            else if (attribute->nodeName() == "hide" && attribute->nodeValue() == "true")
-            {
-                searchItem.hide = true;
+                searchItem.type = SearchItem::Type::RegExp;
             }
         }
-    }
-
-    if (attributes != nullptr)
-    {
-        attributes->release();
+        else if (name == "matchCase" && value== "true")
+        {
+            searchItem.caseSensitive = true;
+        }
+        else if (name == "hide" && value == "true")
+        {
+            searchItem.hide = true;
+        }
+        attribute = attribute->Next();
     }
 }
 
 void parseFilterXml(const std::string& filename, std::vector<SearchItem>& searchItems)
 {
-    std::ifstream                      infile{filename, std::ifstream::in};
-    Poco::XML::InputSource             src(filename);
-    Poco::XML::DOMParser               parser;
-    Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&src);
-    Poco::XML::NodeIterator            it(pDoc, Poco::XML::NodeFilter::SHOW_ALL);
-    Poco::XML::Node*                   pNode = it.nextNode();
-    while (pNode)
+    XMLDocument xmlDoc;
+    XMLError eResult = xmlDoc.LoadFile(filename.c_str());
+    if (!XMLCheckResult(eResult)) {
+        std::cerr << "XML Parsing error: " << eResult << "\n";
+        return;
+    }
+
+    XMLElement * pNode = xmlDoc.FirstChildElement();
+    std::string name{pNode->Name()};
+    if (name == "AnalyseDoc")
     {
-        if (pNode->nodeName() == "SearchText")
+        pNode = pNode->FirstChildElement();
+        while (pNode)
         {
-            SearchItem searchItem;
-            searchItem.text = pNode->innerText();
-
-            parseSearchItemAttributesXml(pNode, searchItem);
-
-            if (searchItem.active)
+            name.assign(pNode->Name());
+            if (name == "SearchText")
             {
-                std::regex::flag_type options = std::regex_constants::egrep | std::regex_constants::optimize;
-                if (!searchItem.caseSensitive)
+                SearchItem searchItem;
+                searchItem.text = pNode->GetText();
+
+                parseSearchItemAttributesXml(pNode, searchItem);
+
+                if (searchItem.active)
                 {
-                    options |= std::regex_constants::icase;
+                    std::regex::flag_type options = std::regex_constants::egrep | std::regex_constants::optimize;
+                    if (!searchItem.caseSensitive)
+                    {
+                        options |= std::regex_constants::icase;
+                    }
+                    if (searchItem.type == SearchItem::Type::RegExp)
+                    {
+                        searchItem.regex.reset(new std::regex{searchItem.text, options});
+                    }
+                    searchItems.push_back(std::move(searchItem));
                 }
-                if (searchItem.type == SearchItem::Type::RegExp)
-                {
-                    searchItem.regex.reset(new std::regex{searchItem.text, options});
-                }
-                searchItems.push_back(std::move(searchItem));
             }
+            pNode = pNode->NextSiblingElement();
         }
-        pNode = it.nextNode();
     }
 }

@@ -5,11 +5,9 @@ project (filter)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
+set(CMAKE_MODULE_PATH "${CMAKE_CXX_FLAGS}" "${CMAKE_CURRENT_SOURCE_DIR}")
 
-###################################################################################################
-# add some default settings
-###################################################################################################
-#include (${PROJECT_SOURCE_DIR}/../CMakeModules/default.cmake)
+find_package(TinyXML2 REQUIRED)
 
 ###################################################################################################
 # Header Files
@@ -30,6 +28,7 @@ set (SOURCE_CPP
 )
 
 add_executable(filter ${SOURCE_CPP} ${SOURCE_H})
-target_link_libraries(filter PocoXML PocoUtil PocoFoundation)
+target_include_directories(filter PRIVATE ${TinyXML2_INCLUDE_DIRS})
+target_link_libraries(filter ${TinyXML2_LIBRARIES})
 
 install(TARGETS filter DESTINATION bin)
